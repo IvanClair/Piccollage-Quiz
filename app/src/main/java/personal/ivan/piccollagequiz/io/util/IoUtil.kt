@@ -23,7 +23,7 @@ abstract class IoUtil<S, R>(private val ioStatus: MutableLiveData<IoStatus>) {
             // load from database
             val dataFromDb = loadFromDb()
             if (dataFromDb != null) {
-                convertFromSource(source = dataFromDb)
+                convertToNeeded(source = dataFromDb)
                     ?.also {
                         emit(it)
                         ioStatus.value = IoStatus.SUCCESS
@@ -32,13 +32,14 @@ abstract class IoUtil<S, R>(private val ioStatus: MutableLiveData<IoStatus>) {
 
             // load from network
             val dataFromNetwork = loadFromNetwork()
+            val afterProcessing = processingSource(source = dataFromNetwork)
 
             // convert API response to actual needed model
-            val convertedData = convertFromSource(source = dataFromNetwork)
+            val convertedData = convertToNeeded(source = afterProcessing)
             when {
                 // load from network succeed
                 convertedData != null -> {
-                    dataFromNetwork?.also { saveToDb(data = it) }
+                    afterProcessing?.also { saveToDb(data = it) }
                     ioStatus.value = IoStatus.SUCCESS
                     emit(convertedData)
                 }
@@ -64,7 +65,9 @@ abstract class IoUtil<S, R>(private val ioStatus: MutableLiveData<IoStatus>) {
 
     protected abstract suspend fun loadFromNetwork(): S?
 
-    protected abstract suspend fun convertFromSource(source: S?): R?
+    protected abstract suspend fun processingSource(source: S?): S?
+
+    protected abstract suspend fun convertToNeeded(source: S?): R?
 
     protected abstract suspend fun saveToDb(data: S)
 

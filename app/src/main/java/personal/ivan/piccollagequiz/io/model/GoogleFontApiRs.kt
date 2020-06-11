@@ -1,5 +1,7 @@
 package personal.ivan.piccollagequiz.io.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.squareup.moshi.Json
 
 data class GoogleFontApiRs(@field:Json(name = "items") val fontList: List<GoogleFontDetails>?)
@@ -7,9 +9,20 @@ data class GoogleFontApiRs(@field:Json(name = "items") val fontList: List<Google
 /**
  * @param downloadUrlMap key : item in [variantList]
  */
+@Entity
 data class GoogleFontDetails(
     val family: String?,
     val category: String?,
     @field:Json(name = "variants") val variantList: List<String>?,
     @field:Json(name = "files") val downloadUrlMap: Map<String, String>?
-)
+) {
+    @PrimaryKey
+    var key: Int = -1
+
+    /**
+     * Create primary key for database usage
+     */
+    fun createPrimaryKey(index: Int) {
+        key = index
+    }
+}
