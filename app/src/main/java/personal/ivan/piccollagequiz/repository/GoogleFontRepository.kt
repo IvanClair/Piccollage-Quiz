@@ -5,9 +5,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import personal.ivan.piccollagequiz.io.model.GoogleFontApiRs
 import personal.ivan.piccollagequiz.io.model.IoStatus
+import personal.ivan.piccollagequiz.io.network.GoogleFontService
 import personal.ivan.piccollagequiz.io.util.IoUtil
+import javax.inject.Inject
 
-class GoogleFontRepository {
+class GoogleFontRepository @Inject constructor(
+    context: Context,
+    service: GoogleFontService
+) {
 
     /**
      * Get Google font list
