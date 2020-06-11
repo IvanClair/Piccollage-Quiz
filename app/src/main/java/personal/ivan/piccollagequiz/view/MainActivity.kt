@@ -54,6 +54,7 @@ class MainActivity : DaggerAppCompatActivity() {
                 this@MainActivity,
                 Observer {
                     // todo
+                    Log.i("", "")
                 }
             )
         }
