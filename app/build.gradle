@@ -24,7 +24,7 @@ android {
 
     // Build Features
     buildFeatures {
-        dataBinding = true
+        viewBinding = true
     }
 
     // Assign Java Version
