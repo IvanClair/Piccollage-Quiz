@@ -6,6 +6,6 @@ import retrofit2.http.Query
 
 interface GoogleFontService {
 
-    @GET("/webfont")
+    @GET("webfonts")
     suspend fun getGoogleFontList(@Query("key") key: String): GoogleFontApiRs
 }

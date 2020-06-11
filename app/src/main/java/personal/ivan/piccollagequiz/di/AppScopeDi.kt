@@ -70,7 +70,7 @@ object RetrofitModule {
     @JvmStatic
     @Singleton
     @Provides
-    fun provideGitHubService(
+    fun provideGoogleFontService(
         application: MainApplication,
         okHttpClient: OkHttpClient
     ): GoogleFontService =

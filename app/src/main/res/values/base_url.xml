@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="base_url_google_font">https://www.googleapis.com/webfonts/v1/webfonts?key=AIzaSyD9fr5P2A7uhgsGYMVTTAfVtmuSuK8gPCI</string>
+    <string name="base_url_google_font">https://www.googleapis.com/webfonts/v1/</string>
 </resources>

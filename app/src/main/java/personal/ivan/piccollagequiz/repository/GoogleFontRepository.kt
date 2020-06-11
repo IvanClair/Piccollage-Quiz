@@ -1,6 +1,5 @@
 package personal.ivan.piccollagequiz.repository
 
-import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import personal.ivan.piccollagequiz.io.model.GoogleFontApiRs
@@ -17,10 +16,7 @@ class GoogleFontRepository @Inject constructor(
     /**
      * Get Google font list
      */
-    suspend fun getGoogleFontList(
-        context: Context,
-        ioStatus: MutableLiveData<IoStatus>
-    ): LiveData<GoogleFontApiRs> =
+    fun getGoogleFontList(ioStatus: MutableLiveData<IoStatus>): LiveData<GoogleFontApiRs> =
         object : IoUtil<GoogleFontApiRs, GoogleFontApiRs>(ioStatus = ioStatus) {
             override suspend fun loadFromDb(): GoogleFontApiRs? = null
 
