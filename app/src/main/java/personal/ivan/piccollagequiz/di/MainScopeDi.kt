@@ -7,16 +7,23 @@ import dagger.Provides
 import dagger.android.ContributesAndroidInjector
 import dagger.multibindings.IntoMap
 import personal.ivan.piccollagequiz.MainApplication
+import personal.ivan.piccollagequiz.R
 import personal.ivan.piccollagequiz.io.network.GoogleFontService
 import personal.ivan.piccollagequiz.repository.GoogleFontRepository
 import personal.ivan.piccollagequiz.view.MainActivity
 import personal.ivan.piccollagequiz.view_model.MainViewModel
 import javax.inject.Scope
 
+// region Scope
+
 @Scope
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 annotation class MainScope
+
+// endregion
+
+// region SubComponent
 
 @Suppress("unused")
 @Module
@@ -31,20 +38,9 @@ abstract class MainActivityModule {
     abstract fun contributeMainActivity(): MainActivity
 }
 
-@Module
-object MainModule {
+// endregion
 
-    /**
-     * Repository
-     */
-    @JvmStatic
-    @MainScope
-    @Provides
-    fun provideGoogleFontRepository(
-        application: MainApplication,
-        service: GoogleFontService
-    ): GoogleFontRepository = GoogleFontRepository(context = application, service = service)
-}
+// region View Model
 
 @Suppress("unused")
 @Module
@@ -56,3 +52,33 @@ abstract class MainViewModelModule {
     @ViewModelKey(MainViewModel::class)
     abstract fun bindMainViewModel(viewModel: MainViewModel): ViewModel
 }
+
+// endregion
+
+// region Main Module
+
+@Module
+object MainModule {
+
+    /**
+     * Repository
+     */
+    @JvmStatic
+    @MainScope
+    @Provides
+    fun provideGoogleFontRepository(
+        service: GoogleFontService,
+        apiKey: String
+    ): GoogleFontRepository = GoogleFontRepository(service = service, apiKey = apiKey)
+
+    /**
+     * API key for Google font API request
+     */
+    @JvmStatic
+    @MainScope
+    @Provides
+    fun provideGoogleFontApiKey(application: MainApplication): String =
+        application.getString(R.string.api_key)
+}
+
+// endregion

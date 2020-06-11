@@ -10,8 +10,8 @@ import personal.ivan.piccollagequiz.io.util.IoUtil
 import javax.inject.Inject
 
 class GoogleFontRepository @Inject constructor(
-    context: Context,
-    service: GoogleFontService
+    private val service: GoogleFontService,
+    private val apiKey: String
 ) {
 
     /**
@@ -24,16 +24,13 @@ class GoogleFontRepository @Inject constructor(
         object : IoUtil<GoogleFontApiRs, GoogleFontApiRs>(ioStatus = ioStatus) {
             override suspend fun loadFromDb(): GoogleFontApiRs? = null
 
-            override suspend fun loadFromNetwork(): GoogleFontApiRs? {
-                TODO("Not yet implemented")
-            }
+            override suspend fun loadFromNetwork(): GoogleFontApiRs? =
+                service.getGoogleFontList(key = apiKey)
 
-            override suspend fun convertFromSource(source: GoogleFontApiRs?): GoogleFontApiRs? {
-                TODO("Not yet implemented")
-            }
+            override suspend fun convertFromSource(source: GoogleFontApiRs?): GoogleFontApiRs? =
+                source
 
             override suspend fun saveToDb(data: GoogleFontApiRs) {
-                TODO("Not yet implemented")
             }
 
         }.getLiveData()
