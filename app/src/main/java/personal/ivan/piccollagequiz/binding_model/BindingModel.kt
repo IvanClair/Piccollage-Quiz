@@ -9,15 +9,16 @@ enum class FontStatus {
 data class FontVhBindingModel(
     val fontFamily: String,
     val style: String,
-    // todo check download status
-    val status: FontStatus
+    val status: FontStatus,
+    val downloadLink: String
 ) {
     constructor(
         data: GoogleFontDetails,
-        variantIndex: Int
+        variant: String
     ) : this(
         fontFamily = data.family ?: "",
-        style = data.variantList?.getOrElse(variantIndex) { "" } ?: "",
-        status = FontStatus.WAITING
+        style = variant,
+        status = FontStatus.WAITING,
+        downloadLink = data.downloadUrlMap?.get(variant) ?: ""
     )
 }

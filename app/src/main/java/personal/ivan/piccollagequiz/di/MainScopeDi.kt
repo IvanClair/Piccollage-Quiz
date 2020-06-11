@@ -8,6 +8,8 @@ import dagger.android.ContributesAndroidInjector
 import dagger.multibindings.IntoMap
 import personal.ivan.piccollagequiz.MainApplication
 import personal.ivan.piccollagequiz.R
+import personal.ivan.piccollagequiz.io.db.AppDb
+import personal.ivan.piccollagequiz.io.db.GoogleFontDao
 import personal.ivan.piccollagequiz.io.network.GoogleFontService
 import personal.ivan.piccollagequiz.repository.GoogleFontRepository
 import personal.ivan.piccollagequiz.view.MainActivity
@@ -68,8 +70,13 @@ object MainModule {
     @Provides
     fun provideGoogleFontRepository(
         service: GoogleFontService,
-        apiKey: String
-    ): GoogleFontRepository = GoogleFontRepository(service = service, apiKey = apiKey)
+        apiKey: String,
+        dao: GoogleFontDao
+    ): GoogleFontRepository = GoogleFontRepository(
+        service = service,
+        apiKey = apiKey,
+        dao = dao
+    )
 
     /**
      * API key for Google font API request
@@ -79,6 +86,15 @@ object MainModule {
     @Provides
     fun provideGoogleFontApiKey(application: MainApplication): String =
         application.getString(R.string.api_key)
+
+    /**
+     * Google font DAO
+     */
+    @JvmStatic
+    @MainScope
+    @Provides
+    fun provideGoogleFontDao(db: AppDb): GoogleFontDao =
+        db.googleFontDao()
 }
 
 // endregion

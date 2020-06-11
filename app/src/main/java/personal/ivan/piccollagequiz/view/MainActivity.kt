@@ -85,7 +85,6 @@ class MainActivity : DaggerAppCompatActivity() {
 
     private fun initRecyclerView() {
         binding.recyclerView.apply {
-            setHasFixedSize(true)
             layoutManager = GridLayoutManager(context, 2)
             adapter = MainAdapter(listener = View.OnClickListener {
                 // todo

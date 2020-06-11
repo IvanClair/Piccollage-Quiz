@@ -2,6 +2,7 @@ package personal.ivan.piccollagequiz.di
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.room.Room
 import dagger.*
 import dagger.android.AndroidInjectionModule
 import dagger.android.AndroidInjector
@@ -10,6 +11,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import personal.ivan.piccollagequiz.BuildConfig
 import personal.ivan.piccollagequiz.MainApplication
 import personal.ivan.piccollagequiz.R
+import personal.ivan.piccollagequiz.io.db.AppDb
 import personal.ivan.piccollagequiz.io.network.GoogleFontService
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -24,6 +26,7 @@ import kotlin.reflect.KClass
         AndroidInjectionModule::class,
         ViewModelFactoryModule::class,
         RetrofitModule::class,
+        DbModule::class,
         MainActivityModule::class
     ]
 )
@@ -105,6 +108,27 @@ object RetrofitModule {
     @Provides
     fun provideHttpLoggingInterceptor(): HttpLoggingInterceptor =
         HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
+}
+
+// endregion
+
+// region Database
+
+@Module
+object DbModule {
+
+    @JvmStatic
+    @Singleton
+    @Provides
+    fun provideAppDb(application: MainApplication) =
+        Room
+            .databaseBuilder(
+                application,
+                AppDb::class.java,
+                application.packageName
+            )
+            .fallbackToDestructiveMigration()
+            .build()
 }
 
 // endregion
