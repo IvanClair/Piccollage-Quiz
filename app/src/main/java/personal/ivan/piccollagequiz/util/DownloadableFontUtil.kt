@@ -23,7 +23,9 @@ class DownloadableFontUtil @Inject constructor(
     }
 
     /**
-     * Download font
+     * Start to download font by [FontsContractCompat]
+     *
+     * @param succeedCallback only invoke when download typeface succeed
      */
     inline fun start(
         fontFamily: String,
@@ -61,7 +63,7 @@ class DownloadableFontUtil @Inject constructor(
 }
 
 /**
- * Split variant to get wright
+ * get weight from variant
  */
 fun String.getWeight(): Int {
     val replacedString = replace(GoogleFontDetails.VARIANT_REGULAR, "")
