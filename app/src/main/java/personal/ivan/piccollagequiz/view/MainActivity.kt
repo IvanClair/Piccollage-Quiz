@@ -1,5 +1,6 @@
 package personal.ivan.piccollagequiz.view
 
+import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
@@ -12,6 +13,7 @@ import personal.ivan.piccollagequiz.binding_model.FontVhBindingModel
 import personal.ivan.piccollagequiz.databinding.ActivityMainBinding
 import personal.ivan.piccollagequiz.di.AppViewModelFactory
 import personal.ivan.piccollagequiz.io.model.IoStatus
+import personal.ivan.piccollagequiz.util.getTypeface
 import personal.ivan.piccollagequiz.view_model.MainViewModel
 import javax.inject.Inject
 
@@ -56,6 +58,12 @@ class MainActivity : DaggerAppCompatActivity() {
                 this@MainActivity,
                 Observer { updateRecyclerView(dataList = it) }
             )
+
+            // downloaded font
+            downloadedTypeface.observe(
+                this@MainActivity,
+                Observer { updateDemoTextViewTypeface(typeface = it) }
+            )
         }
     }
 
@@ -86,14 +94,29 @@ class MainActivity : DaggerAppCompatActivity() {
     private fun initRecyclerView() {
         binding.recyclerView.apply {
             layoutManager = GridLayoutManager(context, 2)
-            adapter = MainAdapter(listener = View.OnClickListener {
-                // todo
+            adapter = MainAdapter(listener = View.OnClickListener { view ->
+                (view.tag as? FontVhBindingModel)?.also { model ->
+                    // preview the font
+                    model.fontFamily
+                        .getTypeface(context = this@MainActivity)
+                        ?.also { updateDemoTextViewTypeface(typeface = it) }
+                    // download the font
+                    viewModel.downloadFont(model = model)
+                }
             })
         }
     }
 
     private fun updateRecyclerView(dataList: List<FontVhBindingModel>) {
         (binding.recyclerView.adapter as? MainAdapter)?.submitList(dataList)
+    }
+
+    // endregion
+
+    // region Demo Text
+
+    private fun updateDemoTextViewTypeface(typeface: Typeface) {
+        binding.textViewDemo.typeface = typeface
     }
 
     // endregion
