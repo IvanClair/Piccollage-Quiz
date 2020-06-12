@@ -6,10 +6,10 @@ import android.os.Handler
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.provider.FontRequest
 import androidx.core.provider.FontsContractCompat
+import androidx.lifecycle.MutableLiveData
 import personal.ivan.piccollagequiz.R
 import personal.ivan.piccollagequiz.io.model.GoogleFontDetails
 import personal.ivan.piccollagequiz.io.model.IoStatus
-import personal.ivan.piccollagequiz.io.model.SingleLiveEvent
 import javax.inject.Inject
 
 class DownloadableFontUtil @Inject constructor(
@@ -29,11 +29,11 @@ class DownloadableFontUtil @Inject constructor(
         fontFamily: String,
         weight: Int,
         italic: Boolean,
-        ioStatus: SingleLiveEvent<IoStatus>,
+        ioStatus: MutableLiveData<IoStatus>,
         crossinline succeedCallback: (Typeface?) -> Unit
     ) {
         // query
-        val query = "name=$fontFamily&wright=$weight&italic=${if (italic) 1.0 else 0.0}"
+        val query = "name=$fontFamily&weight=$weight&italic=${if (italic) 1.0 else 0.0}"
         val request = FontRequest(
             "com.google.android.gms.fonts",
             "com.google.android.gms",

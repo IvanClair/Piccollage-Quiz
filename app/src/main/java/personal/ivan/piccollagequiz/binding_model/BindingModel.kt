@@ -7,7 +7,7 @@ import personal.ivan.piccollagequiz.util.isItalic
 data class FontVhBindingModel(
     val fontFamily: String,
     val variantName: String,
-    val width: Int,
+    val weight: Int,
     val italic: Boolean
 ) {
     constructor(
@@ -16,7 +16,7 @@ data class FontVhBindingModel(
     ) : this(
         fontFamily = data.family ?: "",
         variantName = variant,
-        width = variant.getWeight(),
+        weight = variant.getWeight(),
         italic = variant.isItalic()
     )
 }

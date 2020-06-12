@@ -53,6 +53,7 @@ class MainAdapter(private val listener: View.OnClickListener) :
          */
         fun bind(model: FontVhBindingModel) {
             binding.apply {
+                layoutMain.tag = model
                 layoutMain.setOnClickListener(listener)
                 textViewFontFamily.text = model.fontFamily
                 textViewStyle.text = model.variantName
