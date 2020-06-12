@@ -55,7 +55,7 @@ class MainAdapter(private val listener: View.OnClickListener) :
             binding.apply {
                 layoutMain.setOnClickListener(listener)
                 textViewFontFamily.text = model.fontFamily
-                textViewStyle.text = model.style
+                textViewStyle.text = model.variantName
             }
         }
     }

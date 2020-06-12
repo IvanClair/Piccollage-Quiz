@@ -1,5 +1,7 @@
 package personal.ivan.piccollagequiz.di
 
+import android.os.Handler
+import android.os.HandlerThread
 import androidx.lifecycle.ViewModel
 import dagger.Binds
 import dagger.Module
@@ -12,6 +14,7 @@ import personal.ivan.piccollagequiz.io.db.AppDb
 import personal.ivan.piccollagequiz.io.db.GoogleFontDao
 import personal.ivan.piccollagequiz.io.network.GoogleFontService
 import personal.ivan.piccollagequiz.repository.GoogleFontRepository
+import personal.ivan.piccollagequiz.util.DownloadableFontUtil
 import personal.ivan.piccollagequiz.view.MainActivity
 import personal.ivan.piccollagequiz.view_model.MainViewModel
 import javax.inject.Scope
@@ -65,7 +68,6 @@ object MainModule {
     /**
      * Repository
      */
-    @JvmStatic
     @MainScope
     @Provides
     fun provideGoogleFontRepository(
@@ -81,7 +83,6 @@ object MainModule {
     /**
      * API key for Google font API request
      */
-    @JvmStatic
     @MainScope
     @Provides
     fun provideGoogleFontApiKey(application: MainApplication): String =
@@ -90,11 +91,30 @@ object MainModule {
     /**
      * Google font DAO
      */
-    @JvmStatic
     @MainScope
     @Provides
     fun provideGoogleFontDao(db: AppDb): GoogleFontDao =
         db.googleFontDao()
+
+    /**
+     * Download font util
+     */
+    @MainScope
+    @Provides
+    fun provideDownloadableFontUtil(
+        application: MainApplication,
+        handler: Handler
+    ): DownloadableFontUtil = DownloadableFontUtil(context = application, handler = handler)
+
+
+    /**
+     * Handler for download font
+     */
+    @MainScope
+    @Provides
+    fun provideDownloadFontHandler(): Handler =
+        Handler(HandlerThread("fonts").apply { start() }.looper)
+
 }
 
 // endregion

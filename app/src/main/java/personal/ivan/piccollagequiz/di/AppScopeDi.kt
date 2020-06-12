@@ -70,7 +70,6 @@ object RetrofitModule {
     /**
      * Create Retrofit for API call
      */
-    @JvmStatic
     @Singleton
     @Provides
     fun provideGoogleFontService(
@@ -87,7 +86,6 @@ object RetrofitModule {
     /**
      * Setting HTTP configs
      */
-    @JvmStatic
     @Singleton
     @Provides
     fun provideOkHttpClient(interceptor: HttpLoggingInterceptor): OkHttpClient =
@@ -103,7 +101,6 @@ object RetrofitModule {
     /**
      * Choose to log HTTP detailed information
      */
-    @JvmStatic
     @Singleton
     @Provides
     fun provideHttpLoggingInterceptor(): HttpLoggingInterceptor =
@@ -117,7 +114,6 @@ object RetrofitModule {
 @Module
 object DbModule {
 
-    @JvmStatic
     @Singleton
     @Provides
     fun provideAppDb(application: MainApplication) =

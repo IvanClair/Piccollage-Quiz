@@ -16,6 +16,14 @@ data class GoogleFontDetails(
     @field:Json(name = "variants") val variantList: List<String>?,
     @field:Json(name = "files") val downloadUrlMap: Map<String, String>?
 ) {
+
+    companion object {
+        const val VARIANT_REGULAR = "regular"
+        const val VARIANT_ITALIC = "italic"
+    }
+
+    // region Primary Key
+
     @PrimaryKey
     var key: Int = -1
 
@@ -25,4 +33,6 @@ data class GoogleFontDetails(
     fun createPrimaryKey(index: Int) {
         key = index
     }
+
+    // endregion
 }
