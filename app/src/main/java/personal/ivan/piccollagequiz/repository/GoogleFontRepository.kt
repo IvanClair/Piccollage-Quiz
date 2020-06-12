@@ -57,7 +57,7 @@ class GoogleFontRepository @Inject constructor(
             override suspend fun processingSource(source: List<GoogleFontDetails>?): List<GoogleFontDetails>? =
                 processing(dataList = source)
 
-            override suspend fun convertToNeeded(source: List<GoogleFontDetails>?): List<FontVhBindingModel>? =
+            override suspend fun convertToResult(source: List<GoogleFontDetails>?): List<FontVhBindingModel>? =
                 convert(dataList = source)
 
             override suspend fun saveToDb(data: List<GoogleFontDetails>) {

@@ -13,18 +13,20 @@ abstract class IoUtil<S, R>(private val ioStatus: MutableLiveData<IoStatus>) {
     // Result LiveData
     private val resultLiveData = liveData<R> {
 
+        // flag for data saved before or not
+        var hasSavedData = false
+
         // start with loading status
         ioStatus.value = IoStatus.LOADING
 
-        // TODO Retrofit throws exception if network is unavailable,
-        //     maybe they will update in future, keep an eye on new release
         try {
 
             // load from database
             val dataFromDb = loadFromDb()
             if (dataFromDb != null) {
-                convertToNeeded(source = dataFromDb)
+                convertToResult(source = dataFromDb)
                     ?.also {
+                        hasSavedData = true
                         emit(it)
                         ioStatus.value = IoStatus.SUCCESS
                     }
@@ -35,7 +37,7 @@ abstract class IoUtil<S, R>(private val ioStatus: MutableLiveData<IoStatus>) {
             val afterProcessing = processingSource(source = dataFromNetwork)
 
             // convert API response to actual needed model
-            val convertedData = convertToNeeded(source = afterProcessing)
+            val convertedData = convertToResult(source = afterProcessing)
             when {
                 // load from network succeed
                 convertedData != null -> {
@@ -45,11 +47,14 @@ abstract class IoUtil<S, R>(private val ioStatus: MutableLiveData<IoStatus>) {
                 }
 
                 // load from network failed, and did not save in database before
-                dataFromDb == null -> ioStatus.value = IoStatus.FAIL
+                !hasSavedData -> ioStatus.value = IoStatus.FAIL
             }
         } catch (e: Exception) {
+
             // set fail when exception happened
-            ioStatus.value = IoStatus.FAIL
+            if (!hasSavedData) {
+                ioStatus.value = IoStatus.FAIL
+            }
         }
     }
 
@@ -67,7 +72,7 @@ abstract class IoUtil<S, R>(private val ioStatus: MutableLiveData<IoStatus>) {
 
     protected abstract suspend fun processingSource(source: S?): S?
 
-    protected abstract suspend fun convertToNeeded(source: S?): R?
+    protected abstract suspend fun convertToResult(source: S?): R?
 
     protected abstract suspend fun saveToDb(data: S)
 
