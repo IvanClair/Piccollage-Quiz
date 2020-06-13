@@ -4,6 +4,7 @@ import android.graphics.Typeface
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import io.reactivex.Single
 import personal.ivan.piccollagequiz.binding_model.FontVhBindingModel
 import personal.ivan.piccollagequiz.io.model.IoStatus
 import personal.ivan.piccollagequiz.repository.GoogleFontRepository
@@ -38,10 +39,25 @@ class MainViewModel @Inject constructor(
             weight = model.weight,
             italic = model.italic,
             ioStatus = ioStatus,
-            succeedCallback = { typeface ->
-                typeface?.also { downloadedTypeface.value = it }
-            })
+            downloadedTypeface = downloadedTypeface
+        )
     }
+
+    // endregion
+
+    // region Rx version
+
+    /**
+     * Start download font from [DownloadableFontUtil], Rx version
+     *
+     * @param model the model selected by user
+     */
+    fun downloadFontRx(model: FontVhBindingModel): Single<Typeface> =
+        util.startRx(
+            fontFamily = model.fontFamily,
+            weight = model.weight,
+            italic = model.italic
+        )
 
     // endregion
 }

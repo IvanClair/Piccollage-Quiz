@@ -8,6 +8,7 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.android.support.DaggerAppCompatActivity
+import io.reactivex.disposables.Disposable
 import personal.ivan.piccollagequiz.R
 import personal.ivan.piccollagequiz.binding_model.FontVhBindingModel
 import personal.ivan.piccollagequiz.databinding.ActivityMainBinding
@@ -26,6 +27,47 @@ class MainActivity : DaggerAppCompatActivity() {
     @Inject
     lateinit var factory: AppViewModelFactory
     private val viewModel by viewModels<MainViewModel> { factory }
+
+    // region Rx Observer
+
+    private val googleFontApiObserver =
+        object : io.reactivex.Observer<List<FontVhBindingModel>> {
+            override fun onComplete() {
+                updateProgressBar(enable = false)
+            }
+
+            override fun onSubscribe(d: Disposable) {
+                updateProgressBar(enable = true)
+            }
+
+            override fun onNext(t: List<FontVhBindingModel>) {
+                updateRecyclerView(dataList = t)
+            }
+
+            override fun onError(e: Throwable) {
+                updateProgressBar(enable = false)
+                showFailAlert()
+            }
+        }
+
+    private val downloadedTypefaceObserver =
+        object : io.reactivex.SingleObserver<Typeface> {
+            override fun onSuccess(t: Typeface) {
+                updateDemoTextViewTypeface(typeface = t)
+                updateProgressBar(enable = false)
+            }
+
+            override fun onSubscribe(d: Disposable) {
+                updateProgressBar(enable = true)
+            }
+
+            override fun onError(e: Throwable) {
+                updateProgressBar(enable = false)
+                showFailAlert()
+            }
+        }
+
+    // endregion
 
     // region Life Cycle
 
@@ -100,8 +142,10 @@ class MainActivity : DaggerAppCompatActivity() {
                     model.fontFamily
                         .getTypeface(context = this@MainActivity)
                         ?.also { updateDemoTextViewTypeface(typeface = it) }
+
                     // download the font
-                    viewModel.downloadFont(model = model)
+//                    viewModel.downloadFont(model = model)
+                    viewModel.downloadFontRx(model = model).subscribe(downloadedTypefaceObserver)
                 }
             })
         }

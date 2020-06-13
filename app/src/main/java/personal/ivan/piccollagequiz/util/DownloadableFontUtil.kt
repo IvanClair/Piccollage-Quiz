@@ -7,10 +7,12 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.provider.FontRequest
 import androidx.core.provider.FontsContractCompat
 import androidx.lifecycle.MutableLiveData
+import io.reactivex.Single
 import personal.ivan.piccollagequiz.R
 import personal.ivan.piccollagequiz.io.model.GoogleFontDetails
 import personal.ivan.piccollagequiz.io.model.IoStatus
 import javax.inject.Inject
+
 
 class DownloadableFontUtil @Inject constructor(
     val context: Context,
@@ -24,15 +26,13 @@ class DownloadableFontUtil @Inject constructor(
 
     /**
      * Start to download font by [FontsContractCompat]
-     *
-     * @param succeedCallback only invoke when download typeface succeed
      */
-    inline fun start(
+    fun start(
         fontFamily: String,
         weight: Int,
         italic: Boolean,
         ioStatus: MutableLiveData<IoStatus>,
-        crossinline succeedCallback: (Typeface?) -> Unit
+        downloadedTypeface: MutableLiveData<Typeface>
     ) {
         // query
         val query = "name=$fontFamily&weight=$weight&italic=${if (italic) 1.0 else 0.0}"
@@ -48,12 +48,46 @@ class DownloadableFontUtil @Inject constructor(
             override fun onTypefaceRetrieved(typeface: Typeface?) {
                 super.onTypefaceRetrieved(typeface)
                 ioStatus.value = IoStatus.SUCCESS
-                succeedCallback.invoke(typeface)
+                typeface?.also { downloadedTypeface.value = it }
             }
 
             override fun onTypefaceRequestFailed(reason: Int) {
                 super.onTypefaceRequestFailed(reason)
                 ioStatus.value = IoStatus.FAIL
+            }
+        }
+
+        // start request
+        FontsContractCompat.requestFont(context, request, callback, handler)
+    }
+
+    /**
+     * RxJava version
+     */
+    fun startRx(
+        fontFamily: String,
+        weight: Int,
+        italic: Boolean
+    ): Single<Typeface> = Single.create { emitter ->
+        // query
+        val query = "name=$fontFamily&weight=$weight&italic=${if (italic) 1.0 else 0.0}"
+        val request = FontRequest(
+            "com.google.android.gms.fonts",
+            "com.google.android.gms",
+            query,
+            R.array.com_google_android_gms_fonts_certs
+        )
+
+        // callback
+        val callback = object : FontsContractCompat.FontRequestCallback() {
+            override fun onTypefaceRetrieved(typeface: Typeface?) {
+                super.onTypefaceRetrieved(typeface)
+                typeface?.let { emitter.onSuccess(it) }
+            }
+
+            override fun onTypefaceRequestFailed(reason: Int) {
+                super.onTypefaceRequestFailed(reason)
+                emitter.onError(Exception())
             }
         }
 
