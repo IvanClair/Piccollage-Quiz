@@ -2,7 +2,7 @@ package personal.ivan.piccollagequiz.repository
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -21,6 +21,7 @@ class GoogleFontRepository @Inject constructor(
     private val dao: GoogleFontDao
 ) {
 
+    // region Live Data + Coroutine
     /**
      * Get Google font list
      */
@@ -30,7 +31,7 @@ class GoogleFontRepository @Inject constructor(
         suspend fun processing(dataList: List<GoogleFontDetails>?): List<GoogleFontDetails>? =
             dataList?.apply {
                 withContext(Dispatchers.IO) {
-                    dataList.forEachIndexed { index, googleFontDetails ->
+                    forEachIndexed { index, googleFontDetails ->
                         googleFontDetails.createPrimaryKey(index = index)
                     }
                 }
@@ -71,50 +72,69 @@ class GoogleFontRepository @Inject constructor(
         }.getLiveData()
     }
 
-    /**
-     * get Google font list Rx version
-     */
-    fun getGoogleFontListRx() {
+    // endregion
 
-        // convert to binding model list
-        fun convert(dataList: List<GoogleFontDetails>?): List<FontVhBindingModel> =
-            mutableListOf<FontVhBindingModel>().apply {
-                dataList?.forEach { fontDetails ->
-                    fontDetails.variantList?.forEach {
-                        add(FontVhBindingModel(data = fontDetails, variant = it))
+    // region Rx
+
+    /**
+     * Get Google font list Rx version
+     *
+     * @return results from database, then request from network to update database
+     */
+    fun getGoogleFontListRx(): Observable<List<FontVhBindingModel>> {
+        return Observable.concatArray(
+            fetchFromDb(),
+            fetchFromNetwork()
+        )
+    }
+
+    /**
+     * Fetch results from database
+     */
+    private fun fetchFromDb(): Observable<List<FontVhBindingModel>> =
+        dao.loadAllRx()
+            .subscribeOn(Schedulers.io())
+            // convert
+            .map {
+                mutableListOf<FontVhBindingModel>()
+                    .apply {
+                        it.forEach { fontDetails ->
+                            fontDetails.variantList?.forEach {
+                                add(FontVhBindingModel(data = fontDetails, variant = it))
+                            }
+                        }
+                    }
+                    .toList()
+            }
+            .toObservable()
+
+    /**
+     * Fetch results from network, and save to database
+     */
+    private fun fetchFromNetwork(): Observable<List<FontVhBindingModel>> =
+        service
+            .getGoogleFontListRx(key = apiKey)
+            .subscribeOn(Schedulers.io())
+            .map {
+                it.fontList?.apply {
+                    forEachIndexed { index, googleFontDetails ->
+                        googleFontDetails.createPrimaryKey(index = index)
+                    }
+                }
+            }
+            .doOnNext { dataList ->
+                // save to database
+                dataList?.also { dao.insertAllRx(dataList = dataList) }
+            }
+            .map {
+                mutableListOf<FontVhBindingModel>().apply {
+                    it.forEach { fontDetails ->
+                        fontDetails.variantList?.forEach {
+                            add(FontVhBindingModel(data = fontDetails, variant = it))
+                        }
                     }
                 }
             }
 
-        val a =
-            dao
-                .loadAllRx()
-                .map { convert(dataList = it) }
-
-        // processing origin data
-        fun processing(dataList: List<GoogleFontDetails>?): List<GoogleFontDetails>? =
-            dataList?.apply {
-                dataList.forEachIndexed { index, googleFontDetails ->
-                    googleFontDetails.createPrimaryKey(index = index)
-                }
-            }
-
-        val b =
-            service
-                .getGoogleFontListRx(key = apiKey)
-                .map { processing(dataList = it.fontList) }
-                .map { convert(dataList = it) }
-
-        val c = service
-            .getGoogleFontListRx(key = apiKey)
-            .subscribeOn(Schedulers.newThread())
-            .observeOn(AndroidSchedulers.mainThread())
-
-        // load from db
-        // 有的話，轉換成我要的物件，然後通知外面
-        // load from network
-        // 我要對結果做一些處理
-        // 成功的話，我要把它轉換成我要的物件，然後通知外面
-        // 失敗的話，我要檢查剛剛 db 有沒有，沒有的話我要回傳 error
-    }
+    // endregion
 }

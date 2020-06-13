@@ -8,7 +8,9 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.android.support.DaggerAppCompatActivity
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
+import org.reactivestreams.Subscription
 import personal.ivan.piccollagequiz.R
 import personal.ivan.piccollagequiz.binding_model.FontVhBindingModel
 import personal.ivan.piccollagequiz.databinding.ActivityMainBinding
@@ -33,7 +35,6 @@ class MainActivity : DaggerAppCompatActivity() {
     private val googleFontApiObserver =
         object : io.reactivex.Observer<List<FontVhBindingModel>> {
             override fun onComplete() {
-                updateProgressBar(enable = false)
             }
 
             override fun onSubscribe(d: Disposable) {
@@ -42,6 +43,7 @@ class MainActivity : DaggerAppCompatActivity() {
 
             override fun onNext(t: List<FontVhBindingModel>) {
                 updateRecyclerView(dataList = t)
+                updateProgressBar(enable = false)
             }
 
             override fun onError(e: Throwable) {
@@ -76,6 +78,12 @@ class MainActivity : DaggerAppCompatActivity() {
         setContentView(binding.root)
         initRecyclerView()
         observeLiveData()
+
+        // get api
+        viewModel
+            .getGoogleFontListRx()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(googleFontApiObserver)
     }
 
     // endregion
@@ -96,10 +104,10 @@ class MainActivity : DaggerAppCompatActivity() {
                 })
 
             // data list
-            googleFontList.observe(
-                this@MainActivity,
-                Observer { updateRecyclerView(dataList = it) }
-            )
+//            googleFontList.observe(
+//                this@MainActivity,
+//                Observer { updateRecyclerView(dataList = it) }
+//            )
 
             // downloaded font
             downloadedTypeface.observe(
