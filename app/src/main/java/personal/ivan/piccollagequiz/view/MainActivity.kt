@@ -10,7 +10,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.android.support.DaggerAppCompatActivity
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
-import org.reactivestreams.Subscription
+import io.reactivex.schedulers.Schedulers
 import personal.ivan.piccollagequiz.R
 import personal.ivan.piccollagequiz.binding_model.FontVhBindingModel
 import personal.ivan.piccollagequiz.databinding.ActivityMainBinding
@@ -82,6 +82,7 @@ class MainActivity : DaggerAppCompatActivity() {
         // get api
         viewModel
             .getGoogleFontListRx()
+            .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(googleFontApiObserver)
     }

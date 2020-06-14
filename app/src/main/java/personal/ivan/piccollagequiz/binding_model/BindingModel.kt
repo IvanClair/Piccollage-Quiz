@@ -14,7 +14,7 @@ data class FontVhBindingModel(
         data: GoogleFontDetails,
         variant: String
     ) : this(
-        fontFamily = data.family ?: "",
+        fontFamily = data.family,
         variantName = variant,
         weight = variant.getWeight(),
         italic = variant.isItalic()
