@@ -1,6 +1,8 @@
 package personal.ivan.piccollagequiz.io.db
 
 import androidx.room.*
+import io.reactivex.Flowable
+import io.reactivex.Single
 import personal.ivan.piccollagequiz.io.model.GoogleFontDetails
 
 // region Database
@@ -26,6 +28,12 @@ interface GoogleFontDao {
 
     @Query("SELECT * FROM GoogleFontDetails")
     suspend fun loadAll(): List<GoogleFontDetails>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAllRx(dataList: List<GoogleFontDetails>)
+
+    @Query("SELECT * FROM GoogleFontDetails")
+    fun loadAllRx(): Single<List<GoogleFontDetails>>
 }
 
 // endregion

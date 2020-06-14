@@ -8,6 +8,9 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.android.support.DaggerAppCompatActivity
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import personal.ivan.piccollagequiz.R
 import personal.ivan.piccollagequiz.binding_model.FontVhBindingModel
 import personal.ivan.piccollagequiz.databinding.ActivityMainBinding
@@ -27,6 +30,47 @@ class MainActivity : DaggerAppCompatActivity() {
     lateinit var factory: AppViewModelFactory
     private val viewModel by viewModels<MainViewModel> { factory }
 
+    // region Rx Observer
+
+    private val googleFontApiObserver =
+        object : io.reactivex.Observer<List<FontVhBindingModel>> {
+            override fun onComplete() {
+            }
+
+            override fun onSubscribe(d: Disposable) {
+                updateProgressBar(enable = true)
+            }
+
+            override fun onNext(t: List<FontVhBindingModel>) {
+                updateRecyclerView(dataList = t)
+                updateProgressBar(enable = false)
+            }
+
+            override fun onError(e: Throwable) {
+                updateProgressBar(enable = false)
+                showFailAlert()
+            }
+        }
+
+    private val downloadedTypefaceObserver =
+        object : io.reactivex.SingleObserver<Typeface> {
+            override fun onSuccess(t: Typeface) {
+                updateDemoTextViewTypeface(typeface = t)
+                updateProgressBar(enable = false)
+            }
+
+            override fun onSubscribe(d: Disposable) {
+                updateProgressBar(enable = true)
+            }
+
+            override fun onError(e: Throwable) {
+                updateProgressBar(enable = false)
+                showFailAlert()
+            }
+        }
+
+    // endregion
+
     // region Life Cycle
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,6 +78,13 @@ class MainActivity : DaggerAppCompatActivity() {
         setContentView(binding.root)
         initRecyclerView()
         observeLiveData()
+
+        // get api
+        viewModel
+            .getGoogleFontListRx()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(googleFontApiObserver)
     }
 
     // endregion
@@ -54,10 +105,10 @@ class MainActivity : DaggerAppCompatActivity() {
                 })
 
             // data list
-            googleFontList.observe(
-                this@MainActivity,
-                Observer { updateRecyclerView(dataList = it) }
-            )
+//            googleFontList.observe(
+//                this@MainActivity,
+//                Observer { updateRecyclerView(dataList = it) }
+//            )
 
             // downloaded font
             downloadedTypeface.observe(
@@ -100,8 +151,10 @@ class MainActivity : DaggerAppCompatActivity() {
                     model.fontFamily
                         .getTypeface(context = this@MainActivity)
                         ?.also { updateDemoTextViewTypeface(typeface = it) }
+
                     // download the font
-                    viewModel.downloadFont(model = model)
+//                    viewModel.downloadFont(model = model)
+                    viewModel.downloadFontRx(model = model).subscribe(downloadedTypefaceObserver)
                 }
             })
         }

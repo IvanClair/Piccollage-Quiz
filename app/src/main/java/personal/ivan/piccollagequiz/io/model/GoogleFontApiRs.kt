@@ -11,7 +11,7 @@ data class GoogleFontApiRs(@field:Json(name = "items") val fontList: List<Google
  */
 @Entity
 data class GoogleFontDetails(
-    val family: String?,
+    @PrimaryKey val family: String,
     val category: String?,
     @field:Json(name = "variants") val variantList: List<String>?,
     @field:Json(name = "files") val downloadUrlMap: Map<String, String>?
@@ -21,18 +21,4 @@ data class GoogleFontDetails(
         const val VARIANT_REGULAR = "regular"
         const val VARIANT_ITALIC = "italic"
     }
-
-    // region Primary Key
-
-    @PrimaryKey
-    var key: Int = -1
-
-    /**
-     * Create primary key for database usage
-     */
-    fun createPrimaryKey(index: Int) {
-        key = index
-    }
-
-    // endregion
 }

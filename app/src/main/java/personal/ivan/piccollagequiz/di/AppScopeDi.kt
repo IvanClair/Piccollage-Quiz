@@ -14,6 +14,7 @@ import personal.ivan.piccollagequiz.R
 import personal.ivan.piccollagequiz.io.db.AppDb
 import personal.ivan.piccollagequiz.io.network.GoogleFontService
 import retrofit2.Retrofit
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
 import javax.inject.Singleton
 import kotlin.reflect.KClass
@@ -78,6 +79,7 @@ object RetrofitModule {
     ): GoogleFontService =
         Retrofit.Builder()
             .baseUrl(application.getString(R.string.base_url_google_font))
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .addConverterFactory(MoshiConverterFactory.create())
             .client(okHttpClient)
             .build()
